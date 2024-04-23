@@ -65,17 +65,17 @@ if(MSVC)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
-if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
-    # If we're doing an out of source build and the user has a zconf.h
-    # in their source tree...
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h)
-        message(STATUS "Renaming")
-        message(STATUS "    ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h")
-        message(STATUS "to 'zconf.h.included' because this file is included with zlib")
-        message(STATUS "but CMake generates it automatically in the build directory.")
-        file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.included)
-  endif()
-endif()
+# if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+#     # If we're doing an out of source build and the user has a zconf.h
+#     # in their source tree...
+#     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h)
+#         message(STATUS "Renaming")
+#         message(STATUS "    ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h")
+#         message(STATUS "to 'zconf.h.included' because this file is included with zlib")
+#         message(STATUS "but CMake generates it automatically in the build directory.")
+#         file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h ${CMAKE_CURRENT_SOURCE_DIR}/zconf.h.included)
+#   endif()
+# endif()
 
 set(ZLIB_PC ${CMAKE_CURRENT_BINARY_DIR}/zlib.pc)
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/zlib.pc.cmakein
@@ -149,10 +149,10 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
-add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+# add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+# target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(zlib STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 set_target_properties(zlib PROPERTIES SOVERSION 1)
 
@@ -178,21 +178,39 @@ elseif(BUILD_SHARED_LIBS AND WIN32)
     set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
 endif()
 
-if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS zlib zlibstatic
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+install_dep(zlib include zlib.h zconf.h)
+if (OGRE_PROJECT_FOLDERS)
+	set_property(TARGET zlib PROPERTY FOLDER Dependencies)
+endif ()
+
+if (APPLE)
+ set_target_properties(zlib PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "NO")
+
+ if(OGRE_BUILD_PLATFORM_APPLE_IOS)
+  set_target_properties(zlib PROPERTIES XCODE_ATTRIBUTE_GCC_THUMB_SUPPORT "NO")
+ endif()
 endif()
-if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
-endif()
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
-endif()
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
-endif()
+
+set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}" CACHE PATH "" FORCE)
+set(ZLIB_LIBRARY_DBG "zlib" CACHE STRING "" FORCE)
+set(ZLIB_LIBRARY_REL "zlib" CACHE STRING "" FORCE)
+mark_as_advanced(ZLIB_INCLUDE_DIR ZLIB_LIBRARY_DBG ZLIB_LIBRARY_REL)
+
+# if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
+#     install(TARGETS zlib zlibstatic
+#         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+#         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+#         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+# endif()
+# if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
+#     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
+# endif()
+# if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
+#     install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
+# endif()
+# if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
+#     install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
+# endif()
 
 #============================================================================
 # Example binaries
