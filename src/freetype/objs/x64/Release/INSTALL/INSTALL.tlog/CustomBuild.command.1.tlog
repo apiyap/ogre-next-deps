@@ -1,0 +1,10 @@
+^D:\DEV\PKO-NEXT\PKO_PROJECT\DEPENDENCIES\FREETYPE-2.13.0\OBJS\CMAKEFILES\844CE8178457B3C69F68D5155013B24E\INSTALL_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
