@@ -16,3 +16,12 @@
 [submodule "src/vulkan/shaderc/src/third_party/spirv-tools/external/spirv-headers"]
 	path = src/vulkan/shaderc/src/third_party/spirv-tools/external/spirv-headers
 	url = https://github.com/KhronosGroup/SPIRV-Headers
+[submodule "src/bullet3"]
+	path = src/bullet3
+	url = https://github.com/bulletphysics/bullet3
+[submodule "src/tinyxml2"]
+	path = src/tinyxml2
+	url = https://github.com/leethomason/tinyxml2
+[submodule "src/enet"]
+	path = src/enet
+	url = https://github.com/lsalzman/enet
